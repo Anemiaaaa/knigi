@@ -51,5 +51,25 @@ class Database:
             cur.execute("delete from books where book_id = %s", book_id)
         self.conn.commit()
 
+    def search_books_by_author(self, author):
+        with self.conn.cursor() as cur:
+            cur.execute("select * from books where author = %s", author)
+            return cur.fetchall()
+
+    def create_order(self, books, user_id, total):
+        with self.cursor() as cur:
+            cur.execute(
+                "INSERT INTO orders (user_id, total_sum, order_date, order_status) VALUES (%s, %s, NOW(), 'new')",
+                (user_id, total)
+            )
+            order_id = cur.lastrowid
+
+            for book in books:
+                cur.execute(
+                    "INSERT INTO order_items (order_id, book_id, quntity) VALUES (%s, %s, 1)",
+                    (order_id, book["book_id"])
+                )
+
+        self.conn.commit()
 
 dao=Database()

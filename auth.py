@@ -1,6 +1,7 @@
 
 from PyQt6.QtWidgets import QWidget, QMessageBox
 
+from client_menu import ClientWindow
 from db import dao
 from gen.auth_window import Ui_Auth_Form
 from menu import MenuWidow
@@ -38,7 +39,9 @@ class AuthWindow(QWidget):
             self.close()
 
         if user["role_id"] == 2:
-            self.guest()
+            self.client_window = ClientWindow(user["user_id"])
+            self.client_window.show()
+            self.close()
 
 
     def guest(self):
