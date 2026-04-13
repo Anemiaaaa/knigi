@@ -13,6 +13,7 @@ class ClientWindow(QWidget):
         self.ui.setupUi(self)
 
         self.user_id = user_id
+        self.my_orders = dao.get_orders_by_user_id(self.user_id)
 
         # модель для таблицы заказов
         self.order_model = QStandardItemModel()
@@ -29,8 +30,18 @@ class ClientWindow(QWidget):
         self.ui.comboBox_2.addItems(author["author"] for author in self.authors)
         self.ui.pushButton_find.clicked.connect(self.search)
 
+        # фильтр заказов по статусам
+        self.ui.comboBox_status.addItem("Все")
+        self.ui.comboBox_status.addItem("new")
+        self.ui.comboBox_status.addItem("done")
+        self.ui.comboBox_status.addItem("cancelled")
+        self.ui.pushButton_status.clicked.connect(self.filter_status)
+
         # кнопка оформить заказ
         self.ui.pushButton_order.clicked.connect(self.confirm_order)
+
+        # грузим заказы
+        self.load_client_orders()
 
     def insert_card(self, books):
         for book in books:
@@ -66,6 +77,7 @@ class ClientWindow(QWidget):
         dao.create_order(books, self.user_id, total)
         QMessageBox.information(self, "Готово", f"Заказ оформлен\nСумма: {total} руб.")
         self.order_model.removeRows(0, self.order_model.rowCount())
+        self.load_client_orders()
 
     def search(self):
         author = self.ui.comboBox_2.currentText()
@@ -81,3 +93,44 @@ class ClientWindow(QWidget):
         while self.ui.verticalLayout_4.count():
             widget = self.ui.verticalLayout_4.takeAt(0).widget()
             widget.setParent(None)
+
+    def load_client_orders(self):
+        model = QStandardItemModel()
+
+        model.setHorizontalHeaderLabels(["order_id", "total_sum", "order_date", "order_status"])
+        for order in self.my_orders:
+            row = [
+                QStandardItem(str(order["order_id"])),
+                QStandardItem(str(order["total_sum"])),
+                QStandardItem(str(order["order_date"])),
+                QStandardItem(str(order["order_status"])),
+            ]
+
+            model.appendRow(row)
+
+        self.ui.tableView_orders.setModel(model)
+        self.ui.tableView_orders.resizeRowsToContents()
+
+    def filter_status(self):
+        status = self.ui.comboBox_status.currentText()
+        if status == "Все":
+            self.show_orders(self.my_orders)
+        else:
+            filtered = [order for order in self.my_orders if order["order_status"] == status ]
+            self.show_orders(filtered)
+
+    def show_orders(self, orders):
+        model = QStandardItemModel()
+        model.setHorizontalHeaderLabels(["order_id", "total_sum", "order_date", "order_status"])
+
+        for order in orders:
+            row = [
+                QStandardItem(str(order["order_id"])),
+                QStandardItem(str(order["total_sum"])),
+                QStandardItem(str(order["order_date"])),
+                QStandardItem(str(order["order_status"])),
+            ]
+            model.appendRow(row)
+
+        self.ui.tableView_orders.setModel(model)
+        self.ui.tableView_orders.resizeColumnsToContents()

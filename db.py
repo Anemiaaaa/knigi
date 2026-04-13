@@ -72,4 +72,24 @@ class Database:
 
         self.conn.commit()
 
+    def get_all_orders(self):
+        with self.cursor() as cur:
+            cur.execute("""
+                        SELECT o.order_id, u.username, o.total_sum, o.order_date, o.order_status
+                        FROM orders o
+                                 JOIN users u ON o.user_id = u.user_id
+                        ORDER BY o.order_date DESC
+                        """)
+            return cur.fetchall()
+
+    def update_order_status(self, order_id, status):
+        with self.cursor() as cur:
+            cur.execute("update orders set order_status = %s where order_id = %s", (status, order_id))
+        self.conn.commit()
+
+    def get_orders_by_user_id(self, user_id):
+        with self.cursor() as cur:
+            cur.execute("select order_id, total_sum, order_date, order_status from orders where user_id = %s", user_id)
+            return cur.fetchall()
+
 dao=Database()
