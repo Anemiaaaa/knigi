@@ -26,11 +26,12 @@ class AuthWindow(QWidget):
         print(login, password)
         if not password or not login:
             QMessageBox.warning(self, "лох", "заполни оба поля")
-
+            return
         user = dao.login(login, password)
 
         if not user:
             QMessageBox.warning(self, "мне неприятно", "нет такого")
+            return
 
 
         if user["role_id"] == 1:
@@ -47,6 +48,8 @@ class AuthWindow(QWidget):
     def guest(self):
         self.main_window = MenuWidow()
         self.main_window.show()
+        self.close()
+
         self.main_window.ui.pushButton_add.hide()
         self.main_window.ui.pushButton_edit.hide()
         self.main_window.ui.pushButton_delete.hide()

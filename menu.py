@@ -106,8 +106,9 @@ class MenuWidow(QWidget):
         self.add_edit_window = AddEditWindow(self.selected)
         if self.add_edit_window.exec() == QDialog.DialogCode.Accepted:
             author, book_name, price, discount, image = self.add_edit_window.get()
-
             image = image.split("/")[-1].split(".")[0]
+
+
             dao.edit_book(self.selected["book_id"], book_name, price, author, image, discount)
             self.insert_card()
             QMessageBox.information(self, "ВСЕ ЧЕТКО", "РЕДАКТИРОВАЛОСЬ")

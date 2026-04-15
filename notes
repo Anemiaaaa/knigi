@@ -1,0 +1,45 @@
+def insert_card(self):
+    # Очищаем старые карточки
+    while self.ui.verticalLayout_4.count():
+        item = self.ui.verticalLayout_4.takeAt(0)
+        if item.widget():
+            item.widget().deleteLater()
+
+    books = dao.get_all_books()
+
+    for book in books:
+        card = CardWindow(book)
+        card.clicked.connect(self.najal)
+        self.ui.verticalLayout_4.addWidget(card)
+
+
+
+def mousePressEvent(self, event: QMouseEvent):
+        self.clicked.emit(self.book)
+        super().mousePressEvent(event)
+
+ # фильтруем согласно комбо боксу
+def filter_orders(self):
+    status = self.ui.comboBox.currentText()
+    if status == "Все заказы":
+        self.show_orders(self.all_orders)
+    else:
+        filtered = [o for o in self.all_orders if o["order_status"] == status]
+        self.show_orders(filtered)
+
+
+
+ def change_status(self, index):
+    row = index.row()
+    model = self.ui.tableView.model()
+    order_id = int(model.item(row, 0).text())  # колонка 0 = ID
+
+
+    status, ok = QInputDialog.getItem(
+        self, "Статус", "Выбери статус:",
+        ["new", "done", "cancelled"], editable=False
+    )
+
+    if ok:
+        dao.update_order_status(order_id, status)
+        self.load_orders()
