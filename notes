@@ -43,3 +43,50 @@ def filter_orders(self):
     if ok:
         dao.update_order_status(order_id, status)
         self.load_orders()
+
+
+def confirm_order(self):
+    if self.order_item_model.columnCount() == 0:
+        QMessageBox.information(self, "Ошибка", "Добавьте товары в заказ")
+        return
+
+    games = []
+    total_sum = 0
+
+    for i in range(self.order_item_model.rowCount()):
+        price = float(self.order_item_model.item(i, 2).text())
+        total_sum += price
+        games.append({
+            "game_id": self.order_item_model.item(i, 3).text()
+        })
+
+    dao.create_order(self.user_id, total_sum, games)
+    QMessageBox.information(self, "Успех", f"Заказ на сумму {total_sum} создан.")
+    self.load_client_orders()
+    self.order_item_model.removeRows(0, self.order_item_model.rowCount())
+
+def create_order(self, user_id, total_sum, games):
+    with self.cursor() as cur:
+        cur.execute("insert into orders(user_id, total_sum, order_status) values"
+                    "(%s, %s, %s)", (user_id, total_sum, "new"))
+
+        order_id = cur.lastrowid
+
+        for game in games:
+            cur.execute("insert into order_items(order_id, game_id, quantity) values"
+                        "(%s, %s, %s)", (order_id, game["game_id"], 1))
+
+    self.conn.commit()
+
+
+def add_order_item(self, game):
+    self.selected = game
+    QMessageBox.information(self, "Инфо", "Товар добавлен ")
+    row = [
+        QStandardItem(str(game["game_name"])),
+        QStandardItem(str(game["genre"])),
+        QStandardItem(str(game["price"])),
+        QStandardItem(str(game["game_id"])),
+    ]
+
+    self.order_item_model.appendRow(row)
