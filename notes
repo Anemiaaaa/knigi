@@ -90,3 +90,8 @@ def add_order_item(self, game):
     ]
 
     self.order_item_model.appendRow(row)
+
+    def add_image(self):
+        path, _ = QFileDialog.getOpenFileName(self, "Выберите фото", "image/", "All Files (*)")
+        if path:
+            self.ui.imageLineEdit.setText(path)
